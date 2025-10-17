@@ -1,0 +1,24 @@
+{
+    "options": {
+        "NUM_THREADS": [
+            "1",
+            "2",
+            "4",
+            "8"
+        ],
+        "K_VALUES": [
+            "3"
+        ],
+        "SAMPLING_METHODS": [
+            "EBE"
+        ],
+        "NUM_SAMPLES": [
+            "1000000000"
+        ],
+        "PRECISION": [],
+        "NETWORK": "./networks/syeast.el",
+        "SEED": "1"
+    },
+    "blantPath": "/home/echennau/school/BLANT/BASE/blant",
+    "version": "test"
+}
