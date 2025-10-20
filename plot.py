@@ -4,48 +4,81 @@ import argparse
 from pathlib import Path
 
 
-def plot(csv_path):
-    with open(csv_path, "r") as f:
-        df = pd.read_csv(csv_path)
+def plot_comparison(base_path=None, dev_path=None):
+    # Load CSVs if provided
+    df_base = pd.read_csv(base_path) if base_path else None
+    df_dev = pd.read_csv(dev_path) if dev_path else None
 
-    # Filter by stop mode
-    df_num_samples = df[df["STOP_MODE"] == "NUM_SAMPLES"]
-    df_precision = df[df["STOP_MODE"] == "PRECISION"]
+    for stop_mode in ["NUM_SAMPLES", "PRECISION"]:
+        plt.figure(figsize=(8, 5))
 
-    # Plot
-    plt.figure(figsize=(8, 5))
-    plt.plot(
-        df_num_samples["NUM_THREADS"],
-        df_num_samples["TIME"],
-        "o-r",
-        label="NUM_SAMPLES",
-    )
-    plt.plot(
-        df_precision["NUM_THREADS"], df_precision["TIME"], "o-b", label="PRECISION"
-    )
+        if df_base is not None:
+            df_b = df_base[df_base["STOP_MODE"] == stop_mode]
+            plt.plot(
+                df_b["NUM_THREADS"],
+                df_b["TIME"],
+                "o-r",
+                label=f"Base (master branch)"
+            )
 
-    plt.xlabel("Number of Threads")
-    plt.ylabel("Time (seconds)")
-    plt.title("Performance vs Number of Threads (Stop Modes)")
-    plt.legend()
-    plt.grid(True)
-    plt.tight_layout()
+        if df_dev is not None:
+            df_d = df_dev[df_dev["STOP_MODE"] == stop_mode]
+            plt.plot(
+                df_d["NUM_THREADS"],
+                df_d["TIME"],
+                "o-b",
+                label=f"Dev (dev-sebas branch)"
+            )
 
-    output_path = Path(csv_path).stem + "_plot.png"
-    print("Saved plot to", output_path)
-    plt.savefig(output_path, dpi=300)
+        plt.xlabel("Thread count")
+        plt.ylabel("Runtime (seconds)")
+        ARGS = "k=6, s=EBE, -t=[x-axis]"
+        plt.title(
+            f"Fast Config, Runtime x Thread Count for ({'-p=5' if stop_mode == "PRECISION" else '-n=1,000,000,000'})\n{ARGS}")
+        plt.legend()
+        plt.grid(True, which="both", linestyle="--", linewidth=0.5)
+
+        # Logarithmic x-axis (base 2)
+        plt.xscale("log", base=2)
+        plt.xticks([1, 2, 4, 8, 16, 32, 64], labels=[1, 2, 4, 8, 16, 32, 64])
+
+        plt.tight_layout()
+
+        # Save plot using one of the paths or generic name
+        stem = "unknown"
+        if base_path and dev_path:
+            stem = "combined"
+        else:
+            if base_path:
+                stem = Path(base_path).stem
+            elif dev_path:
+                stem = Path(dev_path).stem
+
+        output_path = f"{stem}_{stop_mode}_plot.png"
+        plt.savefig(output_path, dpi=300)
+        plt.close()
+        print("Saved plot to", output_path)
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i",
+        "-b",
         type=str,
-        help="Path to CSV file.",
+        help="Path to CSV file for base.",
+    )
+    parser.add_argument(
+        "-d",
+        type=str,
+        help="Path to CSV file for dev.",
     )
     args = parser.parse_args()
-    csv_path = args.i
-    plot(csv_path)
+
+    if not args.b and not args.d:
+        print("No CSV files provided, nothing to plot.")
+        return
+
+    plot_comparison(base_path=args.b, dev_path=args.d)
 
 
 if __name__ == "__main__":
