@@ -10,5 +10,5 @@ plot_compare:
 	python3 plot.py -b ./base_output.csv -d ./dev-sebas_output.csv
 
 compare:
-	time python3 main.py -c ./configs/base/fast.base.json
+# 	time python3 main.py -c ./configs/base/fast.base.json
 	time python3 main.py -c ./configs/dev/fast.dev.json

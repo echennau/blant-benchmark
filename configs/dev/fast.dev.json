@@ -13,10 +13,11 @@
             "6"
         ],
         "SAMPLING_METHODS": [
-            "EBE"
+            "EBE",
+            "NBE"
         ],
         "NUM_SAMPLES": [
-            "1000000000"
+            "100000000"
         ],
         "PRECISION": [
             "7"
