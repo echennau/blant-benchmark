@@ -33,6 +33,7 @@ def time_cmd(
     out = subprocess.run(cmd, cwd=cwd, capture_output=True, shell=True)
     if out.returncode != 0:
         print(f"ERROR: Failed to run command: {cmd}")
+        print(out.stdout)
         return 0
 
     end = time.perf_counter()
