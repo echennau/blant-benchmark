@@ -15,14 +15,17 @@ def write_csv(row, output_file, mode="w"):
 def extract_output_metadata(stdout, stderr):
     # frankly I forgot if the stdout or stderr is where it's printed to, search both
     combined = stdout + "\n" + stderr
-    out_lines = combined.split('\n')
-    metadata_output = filter(lambda l: l.startswith("BENCHMARK METADATA:"), out_lines)
-    assert len(metadata_output) == 0  # there should only be one
-    metadata_output = metadata_output[0]
-
+    out_lines = combined.split("\n")
+    metadata_output = list(
+        filter(lambda l: l.startswith("Note: BENCHMARK METADATA"), out_lines)
+    )
+    assert len(metadata_output) == 1  # there should only be one
+    metadata_output = metadata_output[0].split("=")[1]
     METADATA_SEPARATOR = "|"
-    sampling_runtime, num_nodes, num_edges, batch_size = metadata_output.split(METADATA_SEPARATOR)
-    return (sampling_runtime, num_nodes, num_edges, batch_size)
+    sampling_runtime, num_nodes, num_edges, batch_size, batch_counter = (
+        metadata_output.split(METADATA_SEPARATOR)
+    )
+    return (sampling_runtime, num_nodes, num_edges, batch_size, batch_counter)
 
 
 def get_results(
@@ -50,8 +53,10 @@ def get_results(
         return 0
 
     end = time.perf_counter()
-    total_runtime =  end - start
-    return total_runtime, extract_output_metadata(out.stdout.decode(),out.stderr.decode())
+    total_runtime = end - start
+    return total_runtime, *extract_output_metadata(
+        out.stdout.decode(), out.stderr.decode()
+    )
 
 
 def run_benchmarks(config):
@@ -69,7 +74,14 @@ def run_benchmarks(config):
                         # Run NUM_SAMPLES mode
                         for num_samples in args["NUM_SAMPLES"]:
                             stop_mode = "NUM_SAMPLES"
-                            elapsed = time_cmd(
+                            (
+                                elapsed,
+                                sampling_runtime,
+                                num_nodes,
+                                num_edges,
+                                batch_size,
+                                batch_counter,
+                            ) = get_results(
                                 thread,
                                 k,
                                 sampling_method,
@@ -91,6 +103,11 @@ def run_benchmarks(config):
                                     seed,
                                     network,
                                     elapsed,
+                                    sampling_runtime,
+                                    num_nodes,
+                                    num_edges,
+                                    batch_size,
+                                    batch_counter,
                                 ],
                                 output_file,
                                 "a",
@@ -99,7 +116,14 @@ def run_benchmarks(config):
                         # Run PRECISION mode
                         for precision in args["PRECISIONS"]:
                             stop_mode = "PRECISION"
-                            elapsed = time_cmd(
+                            (
+                                elapsed,
+                                sampling_runtime,
+                                num_nodes,
+                                num_edges,
+                                batch_size,
+                                batch_counter,
+                            ) = get_results(
                                 thread,
                                 k,
                                 sampling_method,
@@ -121,6 +145,11 @@ def run_benchmarks(config):
                                     seed,
                                     network,
                                     elapsed,
+                                    sampling_runtime,
+                                    num_nodes,
+                                    num_edges,
+                                    batch_size,
+                                    batch_counter,
                                 ],
                                 output_file,
                                 "a",
@@ -146,6 +175,11 @@ def main():
         "SEED",
         "NETWORK",
         "TIME",
+        "SAMPLING_RUNTIME",
+        "NUM_NODES",
+        "NUM_EDGES",
+        "BATCH_SIZE",
+        "BATCH_COUNTER",
     ]
 
     output_file = f"{config['configName']}_output.csv"
