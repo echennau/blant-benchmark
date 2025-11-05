@@ -12,7 +12,20 @@ def write_csv(row, output_file, mode="w"):
         writer.writerow(row)
 
 
-def time_cmd(
+def extract_output_metadata(stdout, stderr):
+    # frankly I forgot if the stdout or stderr is where it's printed to, search both
+    combined = stdout + "\n" + stderr
+    out_lines = combined.split('\n')
+    metadata_output = filter(lambda l: l.startswith("BENCHMARK METADATA:"), out_lines)
+    assert len(metadata_output) == 0  # there should only be one
+    metadata_output = metadata_output[0]
+
+    METADATA_SEPARATOR = "|"
+    sampling_runtime, num_nodes, num_edges, batch_size = metadata_output.split(METADATA_SEPARATOR)
+    return (sampling_runtime, num_nodes, num_edges, batch_size)
+
+
+def get_results(
     num_threads,
     k_value,
     sampling_method,
@@ -37,7 +50,8 @@ def time_cmd(
         return 0
 
     end = time.perf_counter()
-    return end - start
+    total_runtime =  end - start
+    return total_runtime, extract_output_metadata(out.stdout.decode(),out.stderr.decode())
 
 
 def run_benchmarks(config):
