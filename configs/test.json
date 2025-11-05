@@ -1,9 +1,6 @@
 {
-    "options": {
+    "args": {
         "NUM_THREADS": [
-            "1",
-            "2",
-            "4",
             "8"
         ],
         "K_VALUES": [
@@ -13,12 +10,13 @@
             "EBE"
         ],
         "NUM_SAMPLES": [
-            "1000000000"
+            "1000000"
         ],
-        "PRECISION": [],
-        "NETWORK": "./networks/syeast.el",
-        "SEED": "1"
+        "PRECISIONS": ["1"],
+        "NETWORKS": ["./networks/yeast.el"],
+        "SEEDS": ["1"]
     },
-    "blantPath": "/home/echennau/school/BLANT/BASE/blant",
-    "version": "test"
+    "blantPath": "/home/echennau/school/BLANT/DEV/blant",
+    "configName": "test",
+    "numRuns": 1
 }
