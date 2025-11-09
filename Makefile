@@ -2,7 +2,7 @@
 
 compare:
 # 	time python3 main.py -c ./configs/base/fast.base.json
-	time python3 main.py -c ./configs/dev/batch.dev.json
+	time python3 main.py -c ./configs/linear-test.json
 
 plot:
 	python3 plot.py -d ./dev-sebas_output.csv
