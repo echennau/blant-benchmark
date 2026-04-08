@@ -14,6 +14,7 @@ PYTHON  := python3
 SCRIPT  := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/benchmark.py)
 OUT     := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/output.csv)
 TIMEOUT := 300
+RUNS    := 3
 
 .PHONY: run clean
 
@@ -21,6 +22,7 @@ run:
 	$(PYTHON) $(SCRIPT) \
 		--network $(NETWORK) \
 		--timeout $(TIMEOUT) \
+		--runs $(RUNS) \
 		--out $(OUT)
 
 clean:
