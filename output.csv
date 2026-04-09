@@ -1,0 +1,31 @@
+run,threads,cmd,number_of_samples,stop_mode,time_to_completion_s,returncode
+1,1,/home/echennau/school/BLANT/DEV/blant -k5 -t1 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,152.447,0
+1,1,/home/echennau/school/BLANT/DEV/blant -k5 -t1 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,49.432,0
+1,2,/home/echennau/school/BLANT/DEV/blant -k5 -t2 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,72.365,0
+1,2,/home/echennau/school/BLANT/DEV/blant -k5 -t2 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,30.800,0
+1,4,/home/echennau/school/BLANT/DEV/blant -k5 -t4 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,46.992,0
+1,4,/home/echennau/school/BLANT/DEV/blant -k5 -t4 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,16.500,0
+1,8,/home/echennau/school/BLANT/DEV/blant -k5 -t8 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,29.632,0
+1,8,/home/echennau/school/BLANT/DEV/blant -k5 -t8 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,10.988,0
+1,16,/home/echennau/school/BLANT/DEV/blant -k5 -t16 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,19.053,0
+1,16,/home/echennau/school/BLANT/DEV/blant -k5 -t16 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,8.114,0
+2,1,/home/echennau/school/BLANT/DEV/blant -k5 -t1 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,142.940,0
+2,1,/home/echennau/school/BLANT/DEV/blant -k5 -t1 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,57.159,0
+2,2,/home/echennau/school/BLANT/DEV/blant -k5 -t2 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,80.017,0
+2,2,/home/echennau/school/BLANT/DEV/blant -k5 -t2 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,30.997,0
+2,4,/home/echennau/school/BLANT/DEV/blant -k5 -t4 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,43.972,0
+2,4,/home/echennau/school/BLANT/DEV/blant -k5 -t4 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,18.105,0
+2,8,/home/echennau/school/BLANT/DEV/blant -k5 -t8 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,30.527,0
+2,8,/home/echennau/school/BLANT/DEV/blant -k5 -t8 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,12.515,0
+2,16,/home/echennau/school/BLANT/DEV/blant -k5 -t16 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,23.853,0
+2,16,/home/echennau/school/BLANT/DEV/blant -k5 -t16 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,12.257,0
+3,1,/home/echennau/school/BLANT/DEV/blant -k5 -t1 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,160.684,0
+3,1,/home/echennau/school/BLANT/DEV/blant -k5 -t1 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,56.966,0
+3,2,/home/echennau/school/BLANT/DEV/blant -k5 -t2 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,89.814,0
+3,2,/home/echennau/school/BLANT/DEV/blant -k5 -t2 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,32.300,0
+3,4,/home/echennau/school/BLANT/DEV/blant -k5 -t4 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,53.139,0
+3,4,/home/echennau/school/BLANT/DEV/blant -k5 -t4 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,19.178,0
+3,8,/home/echennau/school/BLANT/DEV/blant -k5 -t8 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,34.013,0
+3,8,/home/echennau/school/BLANT/DEV/blant -k5 -t8 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,11.260,0
+3,16,/home/echennau/school/BLANT/DEV/blant -k5 -t16 -mf -n 150000000 /home/echennau/school/BLANT/DEV/networks/yeast.el,150000000,sample,22.921,0
+3,16,/home/echennau/school/BLANT/DEV/blant -k5 -t16 -mf -p0.0001 /home/echennau/school/BLANT/DEV/networks/yeast.el,55977110,batch,9.112,0
