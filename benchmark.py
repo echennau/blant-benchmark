@@ -2,27 +2,30 @@
 """
 BLANT benchmark script.
 
-Runs BLANT under two stop modes:
+Runs BLANT under two stop modes across three sampling methods:
   - sample-based  (-n N):  stop after exactly N samples
   - batch-based   (-p P):  stop when graphlet concentrations converge to precision P
 
-Both modes use hardcoded values:
-  PRECISION     = 1e-4              (batch mode convergence threshold)
-  SAMPLE_N      = 150_000_000       (sample-based stop count)
-  THREAD_COUNTS = [1, 2, 4, 8, 16]  (all thread counts to test)
+Sampling methods tested: EBE, NBE, MCMC (passed via -s METHOD)
 
-All combinations of stop mode × thread count are repeated --runs times.
+Hardcoded values:
+  PRECISION      = 1e-4              (batch mode convergence threshold, targets ~100M samples)
+  SAMPLE_N       = 100_000_000       (sample-based stop count, exactly 100M)
+  THREAD_COUNTS  = [1, 2, 4, 8, 16]  (all thread counts to test)
+  SAMPLE_METHODS = [EBE, NBE, MCMC]  (sampling methods to test)
 
-Results are written to benchmark_results.csv in the same directory as this script.
+All combinations of stop mode × thread count × sampling method are repeated --runs times.
+
+Results are written to output.csv in the same directory as this script.
 
 Usage:
     python3 benchmark.py [--network PATH] [--k K] [--output-mode M] [--runs N]
 
 Defaults:
-    --network   ../DEV/networks/syeast.el
+    --network   DEV/networks/syeast.el
     --k         5
     --output-mode f    (graphlet frequency; passed as -mf to blant)
-    --runs      5
+    --runs      3
 """
 
 import argparse
@@ -33,12 +36,13 @@ import subprocess
 import sys
 import time
 
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-BLANT_BIN  = os.path.join(SCRIPT_DIR, "..", "DEV", "blant")
+SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
+BLANT_BIN      = os.path.join(SCRIPT_DIR, "DEV", "blant")
 
-PRECISION     = 1e-4               # batch-mode convergence threshold
-SAMPLE_N      = 150_000_000        # sample-mode count
-THREAD_COUNTS = [1, 2, 4, 8, 16]  # thread counts to benchmark
+PRECISION      = 1e-4               # batch-mode convergence threshold (~100M samples)
+SAMPLE_N       = 100_000_000        # sample-mode count (exactly 100M)
+THREAD_COUNTS  = [1, 2, 4, 8, 16]  # thread counts to benchmark
+SAMPLE_METHODS = ["EBE", "NBE", "MCMC"]  # sampling methods to benchmark
 
 # Regex to extract total sample count from BLANT's dedicated stderr line
 _SAMPLES_RE = re.compile(r'BLANT_TOTAL_SAMPLES=(\d+)')
@@ -61,7 +65,9 @@ def run_blant(cmd_args: list[str], timeout: int | None = None) -> dict:
         )
     except subprocess.TimeoutExpired as e:
         elapsed = time.monotonic() - start
-        stderr = e.stderr or ""
+        stderr = e.stderr or b""
+        if isinstance(stderr, bytes):
+            stderr = stderr.decode("utf-8", errors="replace")
         return {
             "returncode": "TIMEOUT",
             "elapsed": elapsed,
@@ -97,12 +103,13 @@ def _extract_samples(text: str) -> int | None:
 
 
 def build_cmd(blant_bin: str, network: str, k: int, threads: int,
-              stop_flag: str, output_mode: str) -> list[str]:
+              stop_flag: str, output_mode: str, sample_method: str) -> list[str]:
     return [
         blant_bin,
         f"-k{k}",
         f"-t{threads}",
         f"-m{output_mode}",
+        f"-s{sample_method}",
         stop_flag,
         network,
     ]
@@ -111,7 +118,7 @@ def build_cmd(blant_bin: str, network: str, k: int, threads: int,
 def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--network",      default=os.path.join(SCRIPT_DIR, "..", "DEV", "networks", "syeast.el"),
+    parser.add_argument("--network",      default=os.path.join(SCRIPT_DIR, "DEV", "networks", "syeast.el"),
                         help="Path to the edge-list network file")
     parser.add_argument("--k",            type=int, default=5,
                         help="Graphlet size (default: 5)")
@@ -121,7 +128,7 @@ def main():
                         help="Per-run timeout in seconds (default: none)")
     parser.add_argument("--runs",         type=int, required=True,
                         help="Number of timed benchmark repetitions")
-    parser.add_argument("--out",          default=os.path.join(SCRIPT_DIR, "benchmark_results.csv"),
+    parser.add_argument("--out",          default=os.path.join(SCRIPT_DIR, "output.csv"),
                         help="Output CSV path")
     args = parser.parse_args()
 
@@ -135,72 +142,67 @@ def main():
     if not os.access(blant_bin, os.X_OK):
         sys.exit(f"ERROR: blant binary is not executable: {blant_bin}")
 
-    print(f"BLANT binary : {blant_bin}")
-    print(f"Network      : {network}")
-    print(f"k            : {args.k}")
-    print(f"Threads      : {THREAD_COUNTS}")
-    print(f"Output mode  : -{args.output_mode}")
-    print(f"Runs         : {args.runs}")
-    print(f"Timeout      : {args.timeout}s" if args.timeout else "Timeout      : none")
-    print(f"Output CSV   : {args.out}")
+    print(f"BLANT binary    : {blant_bin}")
+    print(f"Network         : {network}")
+    print(f"k               : {args.k}")
+    print(f"Sampling methods: {SAMPLE_METHODS}")
+    print(f"Threads         : {THREAD_COUNTS}")
+    print(f"Output mode     : -{args.output_mode}")
+    print(f"Runs            : {args.runs}")
+    print(f"Timeout         : {args.timeout}s" if args.timeout else "Timeout         : none")
+    print(f"Output CSV      : {args.out}")
     print()
 
-    fieldnames = ["run", "threads", "cmd", "number_of_samples", "stop_mode", "time_to_completion_s", "returncode"]
-    rows = []
+    fieldnames = [
+        "run", "sampling_method", "threads", "stop_mode",
+        "number_of_samples", "time_to_completion_s", "returncode", "cmd",
+    ]
+    stop_configs = [
+        ("num_samples", f"-n{SAMPLE_N}"),
+        ("precision",   f"-p{PRECISION}"),
+    ]
 
-    for run_idx in range(1, args.runs + 1):
-        print(f"=== Run {run_idx}/{args.runs} ===")
-        for t in THREAD_COUNTS:
-            configs = [
-                {
-                    "label":       f"t={t} n={SAMPLE_N}",
-                    "stop_mode":   "sample",
-                    "requested_n": SAMPLE_N,
-                    "cmd":         build_cmd(blant_bin, network, args.k, t,
-                                             f"-n {SAMPLE_N}", args.output_mode),
-                },
-                {
-                    "label":       f"t={t} p={PRECISION}",
-                    "stop_mode":   "batch",
-                    "requested_n": None,
-                    "cmd":         build_cmd(blant_bin, network, args.k, t,
-                                             f"-p{PRECISION}", args.output_mode),
-                },
-            ]
-            for cfg in configs:
-                cmd_str = " ".join(cfg["cmd"])
-                print(f"  [{cfg['label']}] {cmd_str}")
-
-                result = run_blant(cfg["cmd"], timeout=args.timeout)
-
-                if cfg["stop_mode"] == "sample":
-                    reported_n = cfg["requested_n"]
-                else:
-                    reported_n = result["samples_from_output"] if result["samples_from_output"] else "N/A (batch)"
-
-                elapsed_str = f"{result['elapsed']:.3f}"
-                print(f"    Done in {elapsed_str}s  |  rc={result['returncode']}  |  samples={reported_n}")
-                if result["returncode"] not in (0, "TIMEOUT"):
-                    print(f"    stderr tail: {result['stderr_tail']}")
-
-                rows.append({
-                    "run":                   run_idx,
-                    "threads":               t,
-                    "cmd":                   cmd_str,
-                    "number_of_samples":     reported_n,
-                    "stop_mode":             cfg["stop_mode"],
-                    "time_to_completion_s":  elapsed_str,
-                    "returncode":            result["returncode"],
-                })
-        print()
-
-    # Write CSV
     with open(args.out, "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        writer.writerows(rows)
+        f.flush()
 
-    print(f"Results written to {args.out}  ({len(rows)} rows)")
+        row_count = 0
+        for run_idx in range(1, args.runs + 1):
+            print(f"=== Run {run_idx}/{args.runs} ===")
+            for method in SAMPLE_METHODS:
+                for t in THREAD_COUNTS:
+                    for stop_mode, stop_flag in stop_configs:
+                        cmd = build_cmd(blant_bin, network, args.k, t,
+                                        stop_flag, args.output_mode, method)
+                        cmd_str = " ".join(cmd)
+                        print(f"  [{method} t={t} {stop_flag}] {cmd_str}")
+
+                        result = run_blant(cmd, timeout=args.timeout)
+
+                        reported_n = (SAMPLE_N if stop_mode == "num_samples"
+                                      else result["samples_from_output"] or "N/A")
+
+                        elapsed_str = f"{result['elapsed']:.3f}"
+                        print(f"    Done in {elapsed_str}s  |  rc={result['returncode']}  |  samples={reported_n}")
+                        if result["returncode"] not in (0, "TIMEOUT"):
+                            print(f"    stderr tail: {result['stderr_tail']}")
+
+                        writer.writerow({
+                            "run":                  run_idx,
+                            "sampling_method":      method,
+                            "threads":              t,
+                            "stop_mode":            stop_mode,
+                            "number_of_samples":    reported_n,
+                            "time_to_completion_s": elapsed_str,
+                            "returncode":           result["returncode"],
+                            "cmd":                  cmd_str,
+                        })
+                        f.flush()
+                        row_count += 1
+            print()
+
+    print(f"Results written to {args.out}  ({row_count} rows)")
 
 
 if __name__ == "__main__":

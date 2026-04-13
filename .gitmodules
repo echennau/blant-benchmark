@@ -1,0 +1,8 @@
+[submodule "DEV"]
+	path = DEV
+	url = https://github.com/echennau/BLANT.git
+	branch = benchmark
+[submodule "BASE"]
+	path = BASE
+	url = https://github.com/waynebhayes/BLANT.git
+	branch = master
