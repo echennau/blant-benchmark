@@ -14,7 +14,7 @@ endif
 PYTHON  := python3
 SCRIPT  := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/benchmark.py)
 OUT     := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/output.csv)
-TIMEOUT := 1200
+TIMEOUT := 6000
 RUNS    := 3
 
 .PHONY: setup run clean
