@@ -39,8 +39,8 @@ import time
 SCRIPT_DIR     = os.path.dirname(os.path.abspath(__file__))
 BLANT_BIN      = os.path.join(SCRIPT_DIR, "DEV", "blant")
 
-PRECISION      = 1e-4               # batch-mode convergence threshold (~100M samples)
-SAMPLE_N       = 100_000_000        # sample-mode count (exactly 100M)
+PRECISION      = 0.00001               # batch-mode convergence threshold (~90M samples)
+SAMPLE_N       = 90_000_000        # sample-mode count (exactly 90M)
 THREAD_COUNTS  = [1, 2, 4, 8, 16]  # thread counts to benchmark
 SAMPLE_METHODS = ["EBE", "NBE", "MCMC"]  # sampling methods to benchmark
 
