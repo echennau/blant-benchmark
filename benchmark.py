@@ -130,6 +130,10 @@ def main():
                         help="Number of timed benchmark repetitions")
     parser.add_argument("--out",          default=os.path.join(SCRIPT_DIR, "output.csv"),
                         help="Output CSV path")
+    parser.add_argument("--methods",      default=None,
+                        help="Comma-separated sampling methods to run (default: all). E.g. MCMC or EBE,NBE")
+    parser.add_argument("--append",       action="store_true",
+                        help="Append to existing CSV instead of overwriting (skips writing header)")
     args = parser.parse_args()
 
     network  = os.path.abspath(args.network)
@@ -142,10 +146,12 @@ def main():
     if not os.access(blant_bin, os.X_OK):
         sys.exit(f"ERROR: blant binary is not executable: {blant_bin}")
 
+    methods = [m.strip().upper() for m in args.methods.split(",")] if args.methods else SAMPLE_METHODS
+
     print(f"BLANT binary    : {blant_bin}")
     print(f"Network         : {network}")
     print(f"k               : {args.k}")
-    print(f"Sampling methods: {SAMPLE_METHODS}")
+    print(f"Sampling methods: {methods}")
     print(f"Threads         : {THREAD_COUNTS}")
     print(f"Output mode     : -{args.output_mode}")
     print(f"Runs            : {args.runs}")
@@ -162,15 +168,17 @@ def main():
         ("precision",   f"-p{PRECISION}"),
     ]
 
-    with open(args.out, "w", newline="") as f:
+    file_mode = "a" if args.append else "w"
+    with open(args.out, file_mode, newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        f.flush()
+        if not args.append:
+            writer.writeheader()
+            f.flush()
 
         row_count = 0
         for run_idx in range(1, args.runs + 1):
             print(f"=== Run {run_idx}/{args.runs} ===")
-            for method in SAMPLE_METHODS:
+            for method in methods:
                 for t in THREAD_COUNTS:
                     for stop_mode, stop_flag in stop_configs:
                         cmd = build_cmd(blant_bin, network, args.k, t,

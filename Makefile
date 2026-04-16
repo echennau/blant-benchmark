@@ -17,7 +17,7 @@ OUT     := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/output.csv)
 TIMEOUT := 6000
 RUNS    := 3
 
-.PHONY: setup run clean
+.PHONY: setup run tmp-mcmc-append clean
 
 setup:
 	git submodule update --init --recursive
@@ -29,6 +29,15 @@ run:
 		--network $(NETWORK) \
 		--timeout $(TIMEOUT) \
 		--runs $(RUNS) \
+		--out $(OUT)
+
+tmp-mcmc-append:
+	$(PYTHON) $(SCRIPT) \
+		--network $(NETWORK) \
+		--timeout $(TIMEOUT) \
+		--runs $(RUNS) \
+		--methods MCMC \
+		--append \
 		--out $(OUT)
 
 clean:
