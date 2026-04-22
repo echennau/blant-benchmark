@@ -41,7 +41,7 @@ BLANT_BIN      = os.path.join(SCRIPT_DIR, "DEV", "blant")
 
 PRECISION      = 0.00001               # batch-mode convergence threshold (~90M samples)
 SAMPLE_N       = 90_000_000        # sample-mode count (exactly 90M)
-THREAD_COUNTS  = [1, 2, 4, 8, 16]  # thread counts to benchmark
+THREAD_COUNTS  = [1, 2, 4, 8, 16, 32, 64, 128]  # thread counts to benchmark
 SAMPLE_METHODS = ["EBE", "NBE", "MCMC"]  # sampling methods to benchmark
 
 # Regex to extract total sample count from BLANT's dedicated stderr line

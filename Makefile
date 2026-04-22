@@ -15,7 +15,7 @@ PYTHON  := python3
 SCRIPT  := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/benchmark.py)
 OUT     := $(abspath $(dir $(lastword $(MAKEFILE_LIST)))/output.csv)
 TIMEOUT := 6000
-RUNS    := 3
+RUNS    := 5
 
 .PHONY: setup run tmp-mcmc-append clean
 
